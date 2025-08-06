@@ -1,0 +1,40 @@
+{
+  "name": "uniapp-segment-tabs",
+  "version": "1.0.0",
+  "description": "uniapp Vue2 分段器组件",
+  "main": "main.js",
+  "scripts": {
+    "dev:h5": "uni build --watch --platform h5",
+    "dev:mp-weixin": "uni build --watch --platform mp-weixin",
+    "dev:app": "uni build --watch --platform app",
+    "build:h5": "uni build --platform h5",
+    "build:mp-weixin": "uni build --platform mp-weixin",
+    "build:app": "uni build --platform app"
+  },
+  "keywords": [
+    "uniapp",
+    "vue2",
+    "segment",
+    "tabs",
+    "indicator",
+    "swiper"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@dcloudio/uni-app": "^2.0.0",
+    "@dcloudio/uni-h5": "^2.0.0",
+    "@dcloudio/uni-mp-weixin": "^2.0.0",
+    "@dcloudio/uni-app-plus": "^2.0.0"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-cli-shared": "^2.0.0",
+    "@dcloudio/vue-cli-plugin-uni": "^2.0.0",
+    "@vue/cli-service": "^4.5.0",
+    "vue": "^2.6.11"
+  },
+  "browserslist": [
+    "Android >= 4.4",
+    "ios >= 9"
+  ]
+}

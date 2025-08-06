@@ -1,161 +1,179 @@
-# 鸿蒙ArkTS底部弹窗组件
+# uniapp Vue2 分段器组件
 
-这是一个鸿蒙ArkTS开发的底部弹窗组件示例，实现了从底部动画弹出的半屏弹窗效果。
+这是一个基于 uniapp Vue2 的分段器组件，支持指示点跟随滑动、页面手动切换、页面保活等功能。
 
 ## 功能特性
 
-- ✅ 从底部平滑动画弹出
-- ✅ 高度为300px（可自定义）
-- ✅ 左右贴着屏幕边缘
-- ✅ 支持拖拽指示器
-- ✅ 支持点击遮罩关闭
-- ✅ 自定义标题和内容
-- ✅ 多种样式配置
+- ✅ 分段器指示点跟随滑动（长度20rpx，高度3rpx）
+- ✅ 支持手动左右滑动切换页面
+- ✅ 分段器跟随页面切换自动滚动
+- ✅ 页面保活，已加载的页面不会销毁
+- ✅ 分段器间距30rpx
+- ✅ 分段器可超出屏幕，自动滚动到对应位置
+- ✅ 每次只加载当前页面，优化性能
 
-## 文件结构
+## 组件结构
 
 ```
-entry/src/main/ets/
-├── pages/
-│   ├── Index.ets              # 基础示例页面
-│   └── BottomSheetDemo.ets    # 完整演示页面
-└── components/
-    └── BottomSheet.ets        # 自定义底部弹窗组件
+components/
+├── SegmentTabs.vue          # 主分段器组件
+└── pages/
+    └── RecommendPage.vue    # 示例页面组件
+
+pages/
+└── index/
+    └── index.vue           # 示例使用页面
 ```
 
 ## 使用方法
 
-### 1. 基础用法（使用系统bindSheet）
+### 1. 引入组件
 
-```typescript
-@Entry
-@Component
-struct Index {
-  @State showBottomSheet: boolean = false
+```vue
+<template>
+  <view class="container">
+    <segment-tabs 
+      :tabs="tabs" 
+      :default-index="0"
+      :content-height="600"
+      @change="handleTabChange"
+    />
+  </view>
+</template>
 
-  build() {
-    Column() {
-      Button('打开底部弹窗')
-        .onClick(() => {
-          this.showBottomSheet = true
-        })
+<script>
+import SegmentTabs from '@/components/SegmentTabs.vue'
+
+export default {
+  components: {
+    SegmentTabs
+  },
+  data() {
+    return {
+      tabs: [
+        {
+          title: '推荐',
+          component: 'RecommendPage'
+        },
+        {
+          title: '热门',
+          component: 'HotPage'
+        },
+        {
+          title: '最新',
+          component: 'LatestPage'
+        }
+      ]
     }
-    .bindSheet($$this.showBottomSheet, this.BottomSheetBuilder(), {
-      height: 300,
-      dragBar: true,
-      showClose: false,
-      backgroundColor: Color.White,
-      onDisappear: () => {
-        this.showBottomSheet = false
-      }
-    })
+  },
+  methods: {
+    handleTabChange(e) {
+      console.log('切换到:', e.item.title, '索引:', e.index)
+    }
   }
+}
+</script>
+```
 
-  @Builder
-  BottomSheetBuilder() {
-    Column() {
-      Text('弹窗内容')
-        .fontSize(18)
-        .margin(20)
-      
-      Button('关闭')
-        .onClick(() => {
-          this.showBottomSheet = false
-        })
-    }
-    .width('100%')
-    .height(300)
+### 2. 组件属性
+
+| 属性名 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| tabs | Array | [] | 分段器数据数组 |
+| defaultIndex | Number | 0 | 默认选中的索引 |
+| contentHeight | Number | 400 | 内容区域高度（px） |
+
+### 3. 事件
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| change | 切换分段器时触发 | { index, item } |
+
+### 4. tabs数据结构
+
+```javascript
+tabs: [
+  {
+    title: '分段器标题',     // 必填，显示的文字
+    component: 'PageName'   // 可选，对应的页面组件名
+  }
+]
+```
+
+## 核心实现
+
+### 1. 指示器跟随
+
+```javascript
+// 更新指示器位置
+updateIndicator() {
+  let left = 0
+  for (let i = 0; i < this.currentIndex; i++) {
+    left += this.tabWidths[i] || 0
+  }
+  
+  const currentTabWidth = this.tabWidths[this.currentIndex] || 0
+  const indicatorOffset = (currentTabWidth - 20) / 2
+  
+  this.indicatorLeft = left + indicatorOffset
+}
+```
+
+### 2. 页面保活
+
+```javascript
+// 加载页面
+loadPage(index) {
+  if (!this.loadedPages.includes(index)) {
+    this.loadedPages.push(index)
   }
 }
 ```
 
-### 2. 高级用法（自定义组件）
+### 3. 分段器滚动
 
-```typescript
-import { CustomBottomSheet, BottomSheetOptions } from '../components/BottomSheet'
-
-@Entry
-@Component
-struct MyPage {
-  private bottomSheet: CustomBottomSheet = new CustomBottomSheet()
-
-  build() {
-    Stack() {
-      // 页面内容
-      Column() {
-        Button('显示弹窗')
-          .onClick(() => {
-            this.bottomSheet
-              .setOptions({
-                height: 300,
-                title: '自定义弹窗',
-                showDragBar: true,
-                backgroundColor: Color.White,
-                onClose: () => {
-                  console.log('弹窗关闭')
-                }
-              })
-              .setContent(() => {
-                this.CustomContent()
-              })
-              .show()
-          })
-      }
-
-      // 弹窗组件
-      CustomBottomSheet()
-    }
+```javascript
+// 滚动到指定tab
+scrollToTab(index) {
+  let scrollLeft = 0
+  for (let i = 0; i < index; i++) {
+    scrollLeft += this.tabWidths[i] || 0
   }
-
-  @Builder
-  CustomContent() {
-    Column() {
-      Text('自定义内容')
-      // ... 更多内容
-    }
-  }
+  
+  const currentTabWidth = this.tabWidths[index] || 0
+  const centerOffset = (this.containerWidth - currentTabWidth) / 2
+  
+  this.scrollLeft = Math.max(0, scrollLeft - centerOffset)
 }
 ```
 
-## 配置选项
+## 样式定制
 
-### BottomSheetOptions
+组件使用 scoped 样式，可以通过以下方式定制：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| height | number \| string | 300 | 弹窗高度 |
-| title | string | - | 弹窗标题 |
-| showDragBar | boolean | true | 是否显示拖拽指示器 |
-| showCloseButton | boolean | true | 是否显示关闭按钮 |
-| backgroundColor | ResourceColor | Color.White | 背景颜色 |
-| borderRadius | number | 16 | 圆角大小 |
-| maskColor | ResourceColor | 'rgba(0,0,0,0.5)' | 遮罩颜色 |
-| onClose | () => void | - | 关闭回调 |
-
-## 动画效果
-
-- **弹出动画**: 从底部向上滑动，持续时间300ms
-- **消失动画**: 向下滑动到底部，持续时间300ms
-- **遮罩动画**: 透明度渐变效果
-- **缓动曲线**: 使用EaseInOut曲线，提供平滑的动画体验
-
-## 最佳实践
-
-1. **高度设置**: 建议高度不超过屏幕的70%，保持良好的用户体验
-2. **内容布局**: 使用flexGrow(1)让内容区域自适应剩余空间
-3. **交互反馈**: 为可点击元素添加适当的视觉反馈
-4. **无障碍支持**: 为重要元素添加语义化描述
+1. 修改组件内部的样式变量
+2. 使用深度选择器覆盖样式
+3. 通过 props 传递样式参数
 
 ## 注意事项
 
-- 弹窗会自动贴着屏幕左右边缘（width: '100%'）
-- 支持点击遮罩层关闭弹窗
-- 可以通过拖拽指示器提示用户可以手势操作
-- 建议在onDisappear回调中重置状态
+1. 由于 uniapp 不支持 `<component>` 标签，页面内容通过条件渲染实现
+2. 组件会自动计算每个 tab 的宽度，确保指示器位置准确
+3. 页面保活机制通过 `loadedPages` 数组控制，已加载的页面不会重新渲染
+4. 分段器滚动使用 `scroll-view` 组件，支持超出屏幕的滚动
 
-## 运行项目
+## 兼容性
 
-1. 在DevEco Studio中打开项目
-2. 连接鸿蒙设备或启动模拟器
-3. 点击运行按钮
-4. 在应用中点击按钮测试底部弹窗效果
+- ✅ H5
+- ✅ 微信小程序
+- ✅ App（iOS/Android）
+- ✅ 其他小程序平台
+
+## 更新日志
+
+### v1.0.0
+- 初始版本
+- 支持基础分段器功能
+- 实现指示器跟随
+- 支持页面保活
+- 支持手动滑动切换
