@@ -48,13 +48,17 @@
             <view v-if="item.component" class="component-wrapper">
               <!-- 动态渲染组件 -->
               <view v-if="item.component === 'RecommendPage'" class="recommend-page">
-                <view class="page-header">
-                  <text class="page-title">{{ item.title }}内容</text>
-                </view>
-                <scroll-view class="content-scroll" scroll-y>
+                <scroll-view 
+                  class="content-scroll" 
+                  scroll-y 
+                  refresher-enabled
+                  :refresher-triggered="getRefreshState(index)"
+                  @refresherrefresh="onRefresh(index)"
+                  @scrolltolower="onLoadMore(index)"
+                >
                   <view class="content-list">
                     <view 
-                      v-for="(content, idx) in getPageData(index)" 
+                      v-for="(content, idx) in pageData[index]?.list || getPageData(index)" 
                       :key="idx"
                       class="content-item"
                     >
@@ -113,11 +117,21 @@ export default {
       loadedPages: [], // 已加载的页面索引
       tabWidths: [], // 每个tab的宽度
       containerWidth: 0, // 容器宽度
-      systemInfo: null
+      systemInfo: null,
+      calculateTimer: null,
+      refreshStates: {}, // 各页面的刷新状态
+      pageData: {} // 各页面的数据
     }
   },
   mounted() {
     this.init()
+  },
+  
+  beforeDestroy() {
+    // 清理定时器
+    if (this.calculateTimer) {
+      clearTimeout(this.calculateTimer)
+    }
   },
   methods: {
     // 初始化
@@ -126,6 +140,7 @@ export default {
       this.getSystemInfo()
       this.$nextTick(() => {
         this.calculateTabWidths()
+        // 只加载当前页面，不预加载其他页面
         this.loadPage(this.currentIndex)
         this.updateIndicator()
       })
@@ -179,6 +194,20 @@ export default {
     loadPage(index) {
       if (!this.loadedPages.includes(index)) {
         this.loadedPages.push(index)
+        // 初始化页面数据
+        this.initPageData(index)
+      }
+    },
+    
+    // 初始化页面数据
+    initPageData(index) {
+      if (!this.pageData[index]) {
+        this.pageData[index] = {
+          list: this.getPageData(index),
+          loading: false,
+          refreshing: false,
+          hasMore: true
+        }
       }
     },
     
@@ -191,11 +220,12 @@ export default {
         left += this.tabWidths[i] || 0
       }
       
-      // 计算当前tab的中心位置
+      // 计算当前tab的中心位置，指示器宽度20rpx
       const currentTabWidth = this.tabWidths[this.currentIndex] || 0
-      const indicatorOffset = (currentTabWidth - 20) / 2 // 20rpx是指示器宽度
+      const indicatorOffset = (currentTabWidth - 20) / 2
       
-      this.indicatorLeft = left + indicatorOffset
+      // 加上左边距30rpx
+      this.indicatorLeft = left + indicatorOffset + 30
     },
     
     // 滚动到指定tab
@@ -211,7 +241,8 @@ export default {
       const currentTabWidth = this.tabWidths[index] || 0
       const centerOffset = (this.containerWidth - currentTabWidth) / 2
       
-      this.scrollLeft = Math.max(0, scrollLeft - centerOffset)
+      // 加上左边距30rpx
+      this.scrollLeft = Math.max(0, scrollLeft - centerOffset + 30)
     },
     
     // 获取页面数据
@@ -292,6 +323,102 @@ export default {
       }
       
       return pageData[index] || []
+    },
+    
+    // 获取刷新状态
+    getRefreshState(index) {
+      return this.refreshStates[index] || false
+    },
+    
+    // 下拉刷新
+    onRefresh(index) {
+      if (this.pageData[index] && this.pageData[index].refreshing) return
+      
+      this.refreshStates[index] = true
+      if (this.pageData[index]) {
+        this.pageData[index].refreshing = true
+      }
+      
+      // 模拟刷新数据
+      setTimeout(() => {
+        if (this.pageData[index]) {
+          this.pageData[index].list = this.getPageData(index)
+          this.pageData[index].refreshing = false
+        }
+        this.refreshStates[index] = false
+        
+        uni.showToast({
+          title: '刷新成功',
+          icon: 'success',
+          duration: 1000
+        })
+      }, 1000)
+    },
+    
+    // 上拉加载更多
+    onLoadMore(index) {
+      if (this.pageData[index] && (this.pageData[index].loading || !this.pageData[index].hasMore)) return
+      
+      if (this.pageData[index]) {
+        this.pageData[index].loading = true
+      }
+      
+      // 模拟加载更多数据
+      setTimeout(() => {
+        if (this.pageData[index]) {
+          const newData = this.getMoreData(index)
+          if (newData.length > 0) {
+            this.pageData[index].list = [...this.pageData[index].list, ...newData]
+          } else {
+            this.pageData[index].hasMore = false
+          }
+          this.pageData[index].loading = false
+        }
+        
+        uni.showToast({
+          title: this.pageData[index]?.hasMore ? '加载成功' : '没有更多数据',
+          icon: 'none',
+          duration: 1000
+        })
+      }, 1000)
+    },
+    
+    // 获取更多数据
+    getMoreData(index) {
+      const moreData = {
+        0: [ // 推荐
+          {
+            title: '推荐内容标题4',
+            description: '这是推荐内容的详细描述，展示一些示例内容...',
+            author: '作者4',
+            date: '2024-01-12'
+          },
+          {
+            title: '推荐内容标题5',
+            description: '这是推荐内容的详细描述，展示一些示例内容...',
+            author: '作者5',
+            date: '2024-01-11'
+          }
+        ],
+        1: [ // 热门
+          {
+            title: '热门内容标题3',
+            description: '这是热门内容的详细描述，展示一些示例内容...',
+            author: '热门作者3',
+            date: '2024-01-13'
+          }
+        ],
+        2: [ // 最新
+          {
+            title: '最新内容标题3',
+            description: '这是最新内容的详细描述，展示一些示例内容...',
+            author: '最新作者3',
+            date: '2024-01-13'
+          }
+        ]
+      }
+      
+      return moreData[index] || []
     }
   }
 }
@@ -389,19 +516,8 @@ export default {
   background-color: #fff;
 }
 
-.page-header {
-  padding: 20rpx 30rpx;
-  border-bottom: 1rpx solid #eee;
-}
-
-.page-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-}
-
 .content-scroll {
-  height: calc(100% - 80rpx);
+  height: 100%;
 }
 
 .content-list {

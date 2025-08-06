@@ -10,7 +10,10 @@
 - ✅ 页面保活，已加载的页面不会销毁
 - ✅ 分段器间距30rpx
 - ✅ 分段器可超出屏幕，自动滚动到对应位置
-- ✅ 每次只加载当前页面，优化性能
+- ✅ 按需加载，每次只加载当前页面
+- ✅ 下拉刷新功能
+- ✅ 上拉加载更多功能
+- ✅ 简洁界面，无多余附加信息
 
 ## 组件结构
 
@@ -126,11 +129,30 @@ updateIndicator() {
 loadPage(index) {
   if (!this.loadedPages.includes(index)) {
     this.loadedPages.push(index)
+    // 初始化页面数据
+    this.initPageData(index)
   }
 }
 ```
 
-### 3. 分段器滚动
+### 3. 下拉刷新和上拉加载
+
+```javascript
+// 下拉刷新
+onRefresh(index) {
+  // 刷新当前页面数据
+  this.pageData[index].list = this.getPageData(index)
+}
+
+// 上拉加载更多
+onLoadMore(index) {
+  // 加载更多数据
+  const newData = this.getMoreData(index)
+  this.pageData[index].list = [...this.pageData[index].list, ...newData]
+}
+```
+
+### 4. 分段器滚动
 
 ```javascript
 // 滚动到指定tab
@@ -161,6 +183,8 @@ scrollToTab(index) {
 2. 组件会自动计算每个 tab 的宽度，确保指示器位置准确
 3. 页面保活机制通过 `loadedPages` 数组控制，已加载的页面不会重新渲染
 4. 分段器滚动使用 `scroll-view` 组件，支持超出屏幕的滚动
+5. 下拉刷新和上拉加载功能已内置，支持各页面独立的数据管理
+6. 指示器位置已优化，考虑了左边距30rpx的偏移
 
 ## 兼容性
 

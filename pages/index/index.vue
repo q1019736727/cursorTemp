@@ -1,9 +1,5 @@
 <template>
   <view class="container">
-    <view class="header">
-      <text class="title">分段器示例</text>
-    </view>
-    
     <segment-tabs 
       :tabs="tabs" 
       :default-index="0"
@@ -63,16 +59,5 @@ export default {
   width: 100%;
   min-height: 100vh;
   background-color: #f5f5f5;
-}
-
-.header {
-  padding: 40rpx 30rpx 20rpx;
-  background-color: #fff;
-}
-
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #333;
 }
 </style>

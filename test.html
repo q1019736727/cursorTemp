@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分段器组件测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .test-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .test-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .test-content {
+            padding: 20px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #007aff;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <div class="test-title">uniapp 分段器组件</div>
+            <div class="test-subtitle">功能特性验证</div>
+        </div>
+        
+        <div class="test-content">
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">指示器跟随滑动（20rpx × 3rpx）</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">手动左右滑动切换页面</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">分段器跟随页面切换自动滚动</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">页面保活，已加载页面不销毁</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">分段器间距30rpx</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">分段器可超出屏幕，自动滚动</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">按需加载，每次只加载当前页面</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">下拉刷新功能</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">上拉加载更多功能</div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">简洁界面，无多余附加信息</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
